@@ -6,15 +6,41 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public class BackgroundSpriteInfo : MonoBehaviour
 {
-    public Vector2 texturePixSize { get; private set; }
-    public Vector2 spritePixSize { get; private set; }
-    public Vector2 spriteSize { get; private set; }
-    public Vector2 viewSize { get; private set; }
+    // Public properties to hold various sizes related to the sprite and the view
+    // These backing fields are read-only in the inspector
+    [SerializeField, ReadOnly] public Vector2 texturePixSizeBackingField;
+    [SerializeField, ReadOnly] public Vector2 spritePixSizeBackingField;
+    [SerializeField, ReadOnly] public Vector2 spriteSizeBackingField;
+    [SerializeField, ReadOnly] public Vector2 viewSizeBackingField;
 
+    // Properties to access the backing fields
+    public Vector2 texturePixSize 
+    { 
+        get => texturePixSizeBackingField;
+        private set => texturePixSizeBackingField = value; 
+    }
+    public Vector2 spritePixSize
+    {
+        get => spritePixSizeBackingField;
+        private set => spritePixSizeBackingField = value;
+    }
+    public Vector2 spriteSize
+    {
+        get => spriteSizeBackingField;
+        private set => spriteSizeBackingField = value;
+    }
+    public Vector2 viewSize
+    {
+        get => viewSizeBackingField;
+        private set => viewSizeBackingField = value;
+    }
+
+    // Private variable to hold the SpriteRenderer component
     private SpriteRenderer spriteRenderer;
 
     /// <summary>
-    /// Initializes the SpriteRenderer component.
+    /// Called when the script instance is being loaded.
+    /// Ensures the SpriteRenderer component is initialized.
     /// </summary>
     private void Awake()
     {
@@ -22,22 +48,30 @@ public class BackgroundSpriteInfo : MonoBehaviour
     }
 
     /// <summary>
-    /// Calculates and stores various sizes related to the sprite when the game starts.
+    /// Called before the first frame update.
+    /// Calculates and stores various sizes related to the sprite.
     /// </summary>
     private void Start()
     {
+        // Get the size of the texture in pixels
         texturePixSize = GetTexturePixelSize();
+        // Calculate the size of the sprite in pixels based on screen coordinates
         spritePixSize = CalculateSpritePixelSize();
+        // Calculate the size of the sprite in world units
         spriteSize = CalculateSpriteSizeInWorldUnits();
+        // Calculate the size of the game view in world units
         viewSize = CalculateGameViewSizeInWorldUnits();
     }
 
     /// <summary>
-    /// Tries to initialize the SpriteRenderer component. If not found, adds it.
+    /// Tries to initialize the SpriteRenderer component.
+    /// If not found, adds it to the GameObject.
     /// </summary>
     private void TryInitializeSpriteRenderer()
     {
+        // Attempt to get the SpriteRenderer component
         spriteRenderer = GetComponent<SpriteRenderer>();
+        // If the component is not found, add it and log a warning
         if (spriteRenderer == null)
         {
             Debug.LogWarning("SpriteRenderer component not found. Adding SpriteRenderer.");
@@ -48,15 +82,17 @@ public class BackgroundSpriteInfo : MonoBehaviour
     /// <summary>
     /// Gets the pixel size of the texture.
     /// </summary>
-    /// <returns>Texture pixel size.</returns>
+    /// <returns>Texture pixel size as a Vector2.</returns>
     private Vector2 GetTexturePixelSize()
     {
+        // Check if the sprite is assigned to the SpriteRenderer
         if (spriteRenderer.sprite == null)
         {
             Debug.LogError("Sprite not found.");
             return Vector2.zero;
         }
 
+        // Get the texture from the sprite
         Texture2D texture = spriteRenderer.sprite.texture;
         if (texture == null)
         {
@@ -64,29 +100,29 @@ public class BackgroundSpriteInfo : MonoBehaviour
             return Vector2.zero;
         }
 
+        // Return the texture size as a Vector2
         return new Vector2(texture.width, texture.height);
     }
 
     /// <summary>
     /// Calculates the pixel size of the sprite.
     /// </summary>
-    /// <returns>Sprite pixel size.</returns>
+    /// <returns>Sprite pixel size as a Vector2.</returns>
     private Vector2 CalculateSpritePixelSize()
     {
-        if (!(Camera.main is Camera mainCamera))
+        // Get the main camera
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null)
         {
             Debug.LogError("Main camera not found.");
             return Vector2.zero;
         }
 
-        // Rendererの境界ボックスの頂点を取得
-        if (!(spriteRenderer.bounds is Bounds bounds))
-        {
-            Debug.LogError("Bounds not found.");
-            return Vector2.zero;
-        }
+        // Get the bounds of the SpriteRenderer
+        Bounds bounds = spriteRenderer.bounds;
         Vector3[] vertices = new Vector3[8];
 
+        // Initialize vertices with the corners of the bounds
         vertices[0] = bounds.min;
         vertices[1] = new Vector3(bounds.max.x, bounds.min.y, bounds.min.z);
         vertices[2] = new Vector3(bounds.max.x, bounds.min.y, bounds.max.z);
@@ -96,7 +132,7 @@ public class BackgroundSpriteInfo : MonoBehaviour
         vertices[6] = bounds.max;
         vertices[7] = new Vector3(bounds.min.x, bounds.max.y, bounds.max.z);
 
-        // 頂点をスクリーン座標に変換
+        // Convert vertices to screen coordinates and find the minimum and maximum points
         Vector2 min = mainCamera.WorldToScreenPoint(vertices[0]);
         Vector2 max = mainCamera.WorldToScreenPoint(vertices[0]);
 
@@ -107,39 +143,41 @@ public class BackgroundSpriteInfo : MonoBehaviour
             max = Vector2.Max(max, screenPoint);
         }
 
-        // スクリーン座標でのサイズを計算
+        // Calculate and return the size of the sprite in pixels
         return max - min;
     }
 
     /// <summary>
     /// Calculates the size of the sprite in world units.
     /// </summary>
-    /// <returns>Sprite size in world units.</returns>
+    /// <returns>Sprite size in world units as a Vector2.</returns>
     private Vector2 CalculateSpriteSizeInWorldUnits()
     {
-        if (!(spriteRenderer.sprite is Sprite sprite))
+        // Get the sprite from the SpriteRenderer
+        Sprite sprite = spriteRenderer.sprite;
+        if (sprite == null)
         {
             Debug.LogError("Sprite not found.");
             return Vector2.zero;
         }
 
-        // テクスチャサイズとPixels Per Unitを考慮してスプライトのワールドサイズを計算
+        // Calculate the width and height in world units considering Pixels Per Unit and lossy scale
         float width = sprite.texture.width / sprite.pixelsPerUnit;
         float height = sprite.texture.height / sprite.pixelsPerUnit;
 
-        // スプライトのスケールを考慮
+        // Apply the lossy scale of the SpriteRenderer's transform
         width *= spriteRenderer.transform.lossyScale.x;
         height *= spriteRenderer.transform.lossyScale.y;
-
         return new Vector2(width, height); ;
     }
 
     /// <summary>
     /// Calculates the size of the game view in world units.
     /// </summary>
-    /// <returns>Game view size in world units.</returns>
+    /// <returns>Game view size in world units as a Vector2.</returns>
     private Vector2 CalculateGameViewSizeInWorldUnits()
     {
+        // Get the main camera
         Camera mainCamera = Camera.main;
         if (mainCamera == null)
         {
@@ -147,10 +185,9 @@ public class BackgroundSpriteInfo : MonoBehaviour
             return Vector2.zero;
         }
 
-        // カメラの近くのクリップ面の四隅をワールド座標で取得
+        // Calculate the view size based on the camera's orthographic size and aspect ratio
         float height = 2f * mainCamera.orthographicSize;
         float width = height * mainCamera.aspect;
-
         return new Vector2(width, height);
     }
 }
