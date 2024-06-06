@@ -1,10 +1,9 @@
-using System.ComponentModel;
 using UnityEngine;
 
 [RequireComponent(typeof(BackgroundSpriteInfo))]
 public class BackgroundScroller : MonoBehaviour
 {
-    // Coordinate where the background is considered off-screen
+    // Struct to hold off-screen positions
     [System.Serializable]
     public struct OffScreenPosition
     {
@@ -14,7 +13,7 @@ public class BackgroundScroller : MonoBehaviour
         public float bottom;
     }
 
-    //coordinate where the background is reset
+    // Struct to hold reset positions
     [System.Serializable]
     public struct ResetPosition
     {
@@ -24,72 +23,115 @@ public class BackgroundScroller : MonoBehaviour
         public float bottom;
     }
 
+    // Struct to hold sprite and view dimensions
+    [System.Serializable]
+    public struct SpriteDimensions
+    {
+        public float spriteWidth;
+        public float spriteHeight;
+        public float viewWidth;
+        public float viewHeight;
+    }
+
     [SerializeField, ReadOnly] private OffScreenPosition offScreenPosition;
     [SerializeField, ReadOnly] private ResetPosition resetPosition;
 
-    [SerializeField, ReadOnly] private float scrollSpeed;  // Background scroll speed
+    [SerializeField, ReadOnly] private float scrollSpeed;
+    [SerializeField, ReadOnly] private Vector3 scrollDirection;
 
     private BackgroundSpriteInfo spriteInfo;
 
     void Start()
     {
         spriteInfo = GetComponent<BackgroundSpriteInfo>();
-
+        scrollDirection = Vector3.left;
         // Initialize scrolling parameters
         InitializeScrollingParameters();
-
-        //InitializeScrollingParameters
-        if (scrollSpeed == 0f) SetScrollSpeed(2f);
+        SetScrollSpeed(2);
+        
     }
     private void Update()
     {
-        Scroll(new Vector3(0, 1, 0), 2);
+        // Example: Call Scroll method from Update for demonstration
+        Vector3 newPosition = Scroll(scrollDirection, scrollSpeed);
+        transform.position = newPosition; // Set the new position
     }
 
+    /// <summary>
+    /// Initialize scrolling parameters based on sprite and view sizes.
+    /// </summary>
     private void InitializeScrollingParameters()
     {
-        float spriteWidth = spriteInfo.spriteSize.x;
-        float spriteHeight = spriteInfo.spriteSize.y;
-        float viewWidth = spriteInfo.viewSize.x;
-        float viewHeight = spriteInfo.viewSize.y;
+        SpriteDimensions dimensions = new SpriteDimensions
+        {
+            spriteWidth = spriteInfo.spriteSize.x,
+            spriteHeight = spriteInfo.spriteSize.y,
+            viewWidth = spriteInfo.viewSize.x,
+            viewHeight = spriteInfo.viewSize.y
+        };
 
-        offScreenPosition.left = -(spriteWidth + viewWidth) / 2;
-        offScreenPosition.right = (spriteWidth + viewWidth) / 2;
-        offScreenPosition.top = (spriteHeight + viewHeight) / 2;
-        offScreenPosition.bottom = -(spriteHeight + viewHeight) / 2;
+        offScreenPosition.left = -(dimensions.spriteWidth + dimensions.viewWidth) / 2;
+        offScreenPosition.right = (dimensions.spriteWidth + dimensions.viewWidth) / 2;
+        offScreenPosition.top = (dimensions.spriteHeight + dimensions.viewHeight) / 2;
+        offScreenPosition.bottom = -(dimensions.spriteHeight + dimensions.viewHeight) / 2;
 
-        resetPosition = CalculateResetPosition();
+        resetPosition = CalculateResetPosition(dimensions, offScreenPosition, scrollDirection);
     }
 
-    public void Scroll(Vector3 direction, float speed)
+    /// <summary>
+    /// Scrolls the background in the specified direction at the specified speed.
+    /// </summary>
+    /// <param name="direction">The direction to scroll the background.</param>
+    /// <param name="speed">The speed at which to scroll the background.</param>
+    /// <returns>The new position of the background.</returns>
+    public Vector3 Scroll(Vector3 direction, float speed)
     {
         // Calculate velocity from direction and speed
         Vector3 velocity = direction.normalized * speed * Time.deltaTime;
 
-        // Move the background using the calculated velocity
-        transform.Translate(velocity);
+        // Calculate the new position using the calculated velocity
+        Vector3 newPosition = transform.position + velocity;
 
+        // Adjust the position if it goes off-screen
+        newPosition = AdjustPositionIfOffScreen(newPosition, direction);
+        return newPosition;
+    }
+
+    /// <summary>
+    /// Adjusts the position if it goes off-screen and returns the adjusted position.
+    /// </summary>
+    /// <param name="position">The current position of the background.</param>
+    /// <param name="direction">The direction in which the background is moving.</param>
+    /// <returns>The adjusted position of the background.</returns>
+    private Vector3 AdjustPositionIfOffScreen(Vector3 position, Vector3 direction)
+    {
         // Check X-axis movement
-        if (direction.x < 0 && transform.position.x < offScreenPosition.left)
+        if (direction.x < 0 && position.x < offScreenPosition.left)
         {
-            transform.position = new Vector3(resetPosition.right, transform.position.y, transform.position.z);
+            position.x = resetPosition.right;
         }
-        else if (direction.x > 0 && transform.position.x > offScreenPosition.right)
+        else if (direction.x > 0 && position.x > offScreenPosition.right)
         {
-            transform.position = new Vector3(resetPosition.left, transform.position.y, transform.position.z);
+            position.x = resetPosition.left;
         }
 
         // Check Y-axis movement
-        if (direction.y < 0 && transform.position.y < offScreenPosition.bottom)
+        if (direction.y < 0 && position.y < offScreenPosition.bottom)
         {
-            transform.position = new Vector3(transform.position.x, resetPosition.top, transform.position.z);
+            position.y = resetPosition.top;
         }
-        else if (direction.y > 0 && transform.position.y > offScreenPosition.top)
+        else if (direction.y > 0 && position.y > offScreenPosition.top)
         {
-            transform.position = new Vector3(transform.position.x, resetPosition.bottom, transform.position.z);
+            position.y = resetPosition.bottom;
         }
+
+        return position;
     }
 
+    /// <summary>
+    /// Sets the scroll speed.
+    /// </summary>
+    /// <param name="newSpeed">The new scroll speed to set.</param>
     public void SetScrollSpeed(float newSpeed)
     {
         if (Mathf.Approximately(scrollSpeed, newSpeed)) return;
@@ -97,31 +139,53 @@ public class BackgroundScroller : MonoBehaviour
         Debug.Log("Speed is set to: " + scrollSpeed);
     }
 
-    ResetPosition CalculateResetPosition()
+    /// <summary>
+    /// Calculates the reset positions for the background.
+    /// </summary>
+    /// <param name="dimensions">The dimensions of the sprite and view.</param>
+    /// <param name="offScreenPosition">The off-screen positions.</param>
+    /// <returns>The calculated reset positions.</returns>
+    private ResetPosition CalculateResetPosition(SpriteDimensions dimensions, OffScreenPosition offScreenPosition, Vector3 direction)
     {
-        float spriteWidth = spriteInfo.spriteSize.x;
-        float spriteHeight = spriteInfo.spriteSize.y;
-        float viewWidth = spriteInfo.viewSize.x;
-        float viewHeight = spriteInfo.viewSize.y;
-
         int siblingCount = GetSiblingCount(gameObject);
-        float excessWidth = (siblingCount - 1) * spriteWidth - viewWidth;
-        float excessHeight = (siblingCount - 1) * spriteHeight - viewHeight;
-        if (siblingCount == -1 || excessWidth < 0 || excessHeight < 0)
+        float excessWidth = (siblingCount - 1) * dimensions.spriteWidth - dimensions.viewWidth;
+        float excessHeight = (siblingCount - 1) * dimensions.spriteHeight - dimensions.viewHeight;
+
+        bool isMovingHorizontally = Mathf.Abs(direction.x) > 0;
+        bool isMovingVertically = Mathf.Abs(direction.y) > 0;
+
+        if (siblingCount == -1 || (isMovingHorizontally && excessWidth < 0) || (isMovingVertically && excessHeight < 0))
         {
-            resetPosition.right = (spriteWidth + viewWidth) / 2;
-            resetPosition.left = -(spriteWidth + viewWidth) / 2;
-            resetPosition.top = (spriteHeight + viewHeight) / 2;
-            resetPosition.bottom = -(spriteHeight + viewHeight) / 2;
-            return resetPosition;
+            return new ResetPosition
+            {
+                right = offScreenPosition.right,
+                left = offScreenPosition.left,
+                top = offScreenPosition.top,
+                bottom = offScreenPosition.bottom
+            };
         }
-        resetPosition.right = Mathf.Abs(excessWidth + (spriteWidth + viewWidth) / 2);
-        resetPosition.left = -Mathf.Abs(excessWidth + (spriteWidth + viewWidth) / 2);
-        resetPosition.top = Mathf.Abs(excessHeight + (spriteHeight + viewHeight) / 2);
-        resetPosition.bottom = -Mathf.Abs(excessHeight + (spriteHeight + viewHeight) / 2);
-        return resetPosition;
+
+        return new ResetPosition
+        {
+            /*
+            right = excessWidth + offScreenPosition.right,
+            left = -excessWidth + offScreenPosition.left,
+            top = excessHeight + offScreenPosition.top,
+            bottom = -excessHeight + offScreenPosition.bottom
+            */
+
+            right = Mathf.Abs(excessWidth + (dimensions.spriteWidth + dimensions.viewWidth) / 2),
+            left = -Mathf.Abs(excessWidth + (dimensions.spriteWidth + dimensions.viewWidth) / 2),
+            top = Mathf.Abs(excessHeight + (dimensions.spriteHeight + dimensions.viewHeight) / 2),
+            bottom = -Mathf.Abs(excessHeight + (dimensions.spriteHeight + dimensions.viewHeight) / 2)
+        };
     }
 
+    /// <summary>
+    /// Gets the sibling count of the specified game object.
+    /// </summary>
+    /// <param name="targetObject">The target game object.</param>
+    /// <returns>The number of siblings, or -1 if an error occurs.</returns>
     private int GetSiblingCount(GameObject targetObject)
     {
         if (targetObject == null)
@@ -130,7 +194,6 @@ public class BackgroundScroller : MonoBehaviour
             return -1;
         }
 
-        // 親オブジェクトを取得
         Transform parentTransform = targetObject.transform.parent;
 
         if (parentTransform == null)
@@ -139,10 +202,7 @@ public class BackgroundScroller : MonoBehaviour
             return -1;
         }
 
-        // 親の子オブジェクトの数を取得
-        int siblingCount = parentTransform.childCount;
-
-        return siblingCount;
+        return parentTransform.childCount;
     }
 }
 
