@@ -4,9 +4,30 @@ using UnityEngine;
 [RequireComponent(typeof(BackgroundSpriteInfo))]
 public class BackgroundScroller : MonoBehaviour
 {
+    // Coordinate where the background is considered off-screen
+    [System.Serializable]
+    public struct OffScreenPosition
+    {
+        public float left;
+        public float right;
+        public float top;
+        public float bottom;
+    }
+
+    //coordinate where the background is reset
+    [System.Serializable]
+    public struct ResetPosition
+    {
+        public float left;
+        public float right;
+        public float top;
+        public float bottom;
+    }
+
+    [SerializeField, ReadOnly] private OffScreenPosition offScreenPosition;
+    [SerializeField, ReadOnly] private ResetPosition resetPosition;
+
     [SerializeField, ReadOnly] private float scrollSpeed;  // Background scroll speed
-    private float offScreenPositionX;  // X coordinate where the background is considered off-screen
-    private float resetPositionX;  // X coordinate where the background is reset
 
     private BackgroundSpriteInfo spriteInfo;
 
@@ -14,26 +35,58 @@ public class BackgroundScroller : MonoBehaviour
     {
         spriteInfo = GetComponent<BackgroundSpriteInfo>();
 
+        // Initialize scrolling parameters
+        InitializeScrollingParameters();
+
         //InitializeScrollingParameters
         if (scrollSpeed == 0f) SetScrollSpeed(2f);
-        offScreenPositionX = CalculateOffScreenPositionX();
-        resetPositionX = CalculateResetPositionXa();
     }
-
     private void Update()
     {
-        Scroll();
+        Scroll(new Vector3(0, 1, 0), 2);
     }
 
-    public void Scroll()
+    private void InitializeScrollingParameters()
     {
-        // Move the background to the left
-        transform.Translate(Vector3.left * scrollSpeed * Time.deltaTime);
+        float spriteWidth = spriteInfo.spriteSize.x;
+        float spriteHeight = spriteInfo.spriteSize.y;
+        float viewWidth = spriteInfo.viewSize.x;
+        float viewHeight = spriteInfo.viewSize.y;
 
-        // If the background has completely moved off-screen to the left, reset its position to the right
-        if (transform.position.x < offScreenPositionX)
+        offScreenPosition.left = -(spriteWidth + viewWidth) / 2;
+        offScreenPosition.right = (spriteWidth + viewWidth) / 2;
+        offScreenPosition.top = (spriteHeight + viewHeight) / 2;
+        offScreenPosition.bottom = -(spriteHeight + viewHeight) / 2;
+
+        resetPosition = CalculateResetPosition();
+    }
+
+    public void Scroll(Vector3 direction, float speed)
+    {
+        // Calculate velocity from direction and speed
+        Vector3 velocity = direction.normalized * speed * Time.deltaTime;
+
+        // Move the background using the calculated velocity
+        transform.Translate(velocity);
+
+        // Check X-axis movement
+        if (direction.x < 0 && transform.position.x < offScreenPosition.left)
         {
-            transform.position = new Vector3(resetPositionX, transform.position.y, transform.position.z);
+            transform.position = new Vector3(resetPosition.right, transform.position.y, transform.position.z);
+        }
+        else if (direction.x > 0 && transform.position.x > offScreenPosition.right)
+        {
+            transform.position = new Vector3(resetPosition.left, transform.position.y, transform.position.z);
+        }
+
+        // Check Y-axis movement
+        if (direction.y < 0 && transform.position.y < offScreenPosition.bottom)
+        {
+            transform.position = new Vector3(transform.position.x, resetPosition.top, transform.position.z);
+        }
+        else if (direction.y > 0 && transform.position.y > offScreenPosition.top)
+        {
+            transform.position = new Vector3(transform.position.x, resetPosition.bottom, transform.position.z);
         }
     }
 
@@ -44,34 +97,52 @@ public class BackgroundScroller : MonoBehaviour
         Debug.Log("Speed is set to: " + scrollSpeed);
     }
 
-    float CalculateOffScreenPositionX()
-    {
-        return -spriteInfo.spriteSize.x;
-    }
-
-    float CalculateResetPositionXb()
+    ResetPosition CalculateResetPosition()
     {
         float spriteWidth = spriteInfo.spriteSize.x;
+        float spriteHeight = spriteInfo.spriteSize.y;
         float viewWidth = spriteInfo.viewSize.x;
-        float sumOfSpriteWidth = spriteWidth;
-        while (sumOfSpriteWidth < viewWidth)
+        float viewHeight = spriteInfo.viewSize.y;
+
+        int siblingCount = GetSiblingCount(gameObject);
+        float excessWidth = (siblingCount - 1) * spriteWidth - viewWidth;
+        float excessHeight = (siblingCount - 1) * spriteHeight - viewHeight;
+        if (siblingCount == -1 || excessWidth < 0 || excessHeight < 0)
         {
-            sumOfSpriteWidth += spriteWidth;
-            //Debug.Log("1");
+            resetPosition.right = (spriteWidth + viewWidth) / 2;
+            resetPosition.left = -(spriteWidth + viewWidth) / 2;
+            resetPosition.top = (spriteHeight + viewHeight) / 2;
+            resetPosition.bottom = -(spriteHeight + viewHeight) / 2;
+            return resetPosition;
         }
-        float widthRemainder = sumOfSpriteWidth / viewWidth;
-        //Debug.Log($"widthRemainder:{widthRemainder}");
-        float resetPositionX = spriteInfo.spriteSize.x + widthRemainder;
-        //Debug.Log(resetPositionX);
-        return resetPositionX;
+        resetPosition.right = Mathf.Abs(excessWidth + (spriteWidth + viewWidth) / 2);
+        resetPosition.left = -Mathf.Abs(excessWidth + (spriteWidth + viewWidth) / 2);
+        resetPosition.top = Mathf.Abs(excessHeight + (spriteHeight + viewHeight) / 2);
+        resetPosition.bottom = -Mathf.Abs(excessHeight + (spriteHeight + viewHeight) / 2);
+        return resetPosition;
     }
 
-    private float CalculateResetPositionXa()
+    private int GetSiblingCount(GameObject targetObject)
     {
-        float spriteWidth = spriteInfo.spriteSize.x;
-        float viewWidth = spriteInfo.viewSize.x;
-        float requiredWidth = Mathf.Ceil(viewWidth / spriteWidth) * spriteWidth;
-        return spriteInfo.spriteSize.x + (requiredWidth - viewWidth);
+        if (targetObject == null)
+        {
+            Debug.LogError("Target object is not assigned.");
+            return -1;
+        }
+
+        // 親オブジェクトを取得
+        Transform parentTransform = targetObject.transform.parent;
+
+        if (parentTransform == null)
+        {
+            Debug.LogError("Target object does not have a parent.");
+            return -1;
+        }
+
+        // 親の子オブジェクトの数を取得
+        int siblingCount = parentTransform.childCount;
+
+        return siblingCount;
     }
 }
 

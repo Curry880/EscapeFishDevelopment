@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(BackgroundScroller))]
-public class BackgroundController : MonoBehaviour
+public class BackgroundViewController : MonoBehaviour
 {
     private BackgroundScroller scroller;
     // Start is called before the first frame update
@@ -15,6 +13,6 @@ public class BackgroundController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        scroller.Scroll();
+        //scroller.Scroll();
     }
 }

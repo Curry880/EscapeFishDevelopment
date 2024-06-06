@@ -3,15 +3,14 @@ using UnityEngine;
 /// <summary>
 /// This class provides information about the sprite attached to the background object.
 /// </summary>
-[RequireComponent(typeof(SpriteRenderer))]
 public class BackgroundSpriteInfo : MonoBehaviour
 {
     // Public properties to hold various sizes related to the sprite and the view
     // These backing fields are read-only in the inspector
-    [SerializeField, ReadOnly] public Vector2 texturePixSizeBackingField;
-    [SerializeField, ReadOnly] public Vector2 spritePixSizeBackingField;
-    [SerializeField, ReadOnly] public Vector2 spriteSizeBackingField;
-    [SerializeField, ReadOnly] public Vector2 viewSizeBackingField;
+    [SerializeField, ReadOnly] private Vector2 texturePixSizeBackingField;
+    [SerializeField, ReadOnly] private Vector2 spritePixSizeBackingField;
+    [SerializeField, ReadOnly] private Vector2 spriteSizeBackingField;
+    [SerializeField, ReadOnly] private Vector2 viewSizeBackingField;
 
     // Properties to access the backing fields
     public Vector2 texturePixSize 
@@ -54,11 +53,11 @@ public class BackgroundSpriteInfo : MonoBehaviour
     private void Start()
     {
         // Get the size of the texture in pixels
-        texturePixSize = GetTexturePixelSize();
+        texturePixSize = GetTexturePixelSize(spriteRenderer);
         // Calculate the size of the sprite in pixels based on screen coordinates
-        spritePixSize = CalculateSpritePixelSize();
+        spritePixSize = CalculateSpritePixelSize(spriteRenderer);
         // Calculate the size of the sprite in world units
-        spriteSize = CalculateSpriteSizeInWorldUnits();
+        spriteSize = CalculateSpriteSizeInWorldUnits(spriteRenderer);
         // Calculate the size of the game view in world units
         viewSize = CalculateGameViewSizeInWorldUnits();
     }
@@ -82,18 +81,19 @@ public class BackgroundSpriteInfo : MonoBehaviour
     /// <summary>
     /// Gets the pixel size of the texture.
     /// </summary>
+    /// <param name="renderer">The SpriteRenderer component to get the texture size from.</param>
     /// <returns>Texture pixel size as a Vector2.</returns>
-    private Vector2 GetTexturePixelSize()
+    private Vector2 GetTexturePixelSize(SpriteRenderer renderer)
     {
         // Check if the sprite is assigned to the SpriteRenderer
-        if (spriteRenderer.sprite == null)
+        if (renderer.sprite == null)
         {
             Debug.LogError("Sprite not found.");
             return Vector2.zero;
         }
 
         // Get the texture from the sprite
-        Texture2D texture = spriteRenderer.sprite.texture;
+        Texture2D texture = renderer.sprite.texture;
         if (texture == null)
         {
             Debug.LogError("Texture not found.");
@@ -107,8 +107,9 @@ public class BackgroundSpriteInfo : MonoBehaviour
     /// <summary>
     /// Calculates the pixel size of the sprite.
     /// </summary>
+    /// <param name="renderer">The SpriteRenderer component to calculate the sprite size from.</param>
     /// <returns>Sprite pixel size as a Vector2.</returns>
-    private Vector2 CalculateSpritePixelSize()
+    private Vector2 CalculateSpritePixelSize(SpriteRenderer renderer)
     {
         // Get the main camera
         Camera mainCamera = Camera.main;
@@ -119,7 +120,7 @@ public class BackgroundSpriteInfo : MonoBehaviour
         }
 
         // Get the bounds of the SpriteRenderer
-        Bounds bounds = spriteRenderer.bounds;
+        Bounds bounds = renderer.bounds;
         Vector3[] vertices = new Vector3[8];
 
         // Initialize vertices with the corners of the bounds
@@ -150,11 +151,12 @@ public class BackgroundSpriteInfo : MonoBehaviour
     /// <summary>
     /// Calculates the size of the sprite in world units.
     /// </summary>
+    /// <param name="renderer">The SpriteRenderer component to calculate the sprite size from.</param>
     /// <returns>Sprite size in world units as a Vector2.</returns>
-    private Vector2 CalculateSpriteSizeInWorldUnits()
+    private Vector2 CalculateSpriteSizeInWorldUnits(SpriteRenderer renderer)
     {
         // Get the sprite from the SpriteRenderer
-        Sprite sprite = spriteRenderer.sprite;
+        Sprite sprite = renderer.sprite;
         if (sprite == null)
         {
             Debug.LogError("Sprite not found.");
