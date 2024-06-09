@@ -1,15 +1,24 @@
 using UnityEngine;
 
 /// <summary>
-/// This class provides information about the sprite attached to the background object.
+/// This class provides information about the graphics elements (sprite, texture, view) attached to the background object.
 /// </summary>
-public class BackgroundSpriteInfo : MonoBehaviour
+public class BackgroundGraphicsInfo : MonoBehaviour
 {
     // Public properties to hold various sizes related to the sprite and the view
     // These backing fields are read-only in the inspector
+    [Header("Texture Information")]
+    [Tooltip("The pixel size of the texture.")]
     [SerializeField, ReadOnly] private Vector2 texturePixSizeBackingField;
+
+    [Header("Sprite Information")]
+    [Tooltip("The pixel size of the sprite as it appears on the screen.")]
     [SerializeField, ReadOnly] private Vector2 spritePixSizeBackingField;
+    [Tooltip("The size of the sprite in world units.")]
     [SerializeField, ReadOnly] private Vector2 spriteSizeBackingField;
+
+    [Header("View Information")]
+    [Tooltip("The size of the game view in world units.")]
     [SerializeField, ReadOnly] private Vector2 viewSizeBackingField;
 
     // Properties to access the backing fields
@@ -44,14 +53,7 @@ public class BackgroundSpriteInfo : MonoBehaviour
     private void Awake()
     {
         TryInitializeSpriteRenderer();
-    }
 
-    /// <summary>
-    /// Called before the first frame update.
-    /// Calculates and stores various sizes related to the sprite.
-    /// </summary>
-    private void Start()
-    {
         // Get the size of the texture in pixels
         texturePixSize = GetTexturePixelSize(spriteRenderer);
         // Calculate the size of the sprite in pixels based on screen coordinates
@@ -60,6 +62,15 @@ public class BackgroundSpriteInfo : MonoBehaviour
         spriteSize = CalculateSpriteSizeInWorldUnits(spriteRenderer);
         // Calculate the size of the game view in world units
         viewSize = CalculateGameViewSizeInWorldUnits();
+    }
+
+    /// <summary>
+    /// Called before the first frame update.
+    /// Calculates and stores various sizes related to the sprite.
+    /// </summary>
+    private void Start()
+    {
+        
     }
 
     /// <summary>
