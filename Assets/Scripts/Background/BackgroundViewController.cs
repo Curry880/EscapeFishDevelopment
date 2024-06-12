@@ -50,7 +50,7 @@ public class BackgroundViewController : MonoBehaviour
     {
         if (Mathf.Approximately(scrollSpeed, newSpeed)) { return; }
         scrollSpeed = newSpeed;
-        Debug.Log("Speed is set to: " + scrollSpeed);
+        //Debug.Log("Speed is set to: " + scrollSpeed);
     }
 
     /// <summary>
@@ -61,10 +61,10 @@ public class BackgroundViewController : MonoBehaviour
     {
         if (Mathf.Approximately(scrollDirection.x, newDirection.x) && Mathf.Approximately(scrollDirection.y, newDirection.y) && Mathf.Approximately(scrollDirection.z, newDirection.z)) { return; }
         scrollDirection = newDirection;
-        Debug.Log("Direction is set to: " + scrollDirection);
+        //Debug.Log("Direction is set to: " + scrollDirection);
     }
 
-    public void SetNewParametare(float newScrollSpeed, Vector3 newScrollDirection)
+    public void SetNewParameters(float newScrollSpeed, Vector3 newScrollDirection)
     {
         SetScrollSpeed(newScrollSpeed);
         SetScrollDirection(newScrollDirection);
