@@ -186,13 +186,13 @@ public class BackgroundScroller : MonoBehaviour
         {
             resetPosition.right = offScreenPosition.right;
             resetPosition.left = offScreenPosition.left;
-            Debug.LogWarning("For smooth scrolling, increase the number of child elements or widen the sprite's width.");
+            //Debug.LogWarning("For smooth scrolling, increase the number of child elements or widen the sprite's width.");
         }
         if (excessHeight < 0)
         {
             resetPosition.top = offScreenPosition.top;
             resetPosition.bottom = offScreenPosition.bottom;
-            Debug.LogWarning("For smooth scrolling, increase the number of child elements or widen the sprite's height.");
+            //Debug.LogWarning("For smooth scrolling, increase the number of child elements or widen the sprite's height.");
         }
         
         return resetPosition;
