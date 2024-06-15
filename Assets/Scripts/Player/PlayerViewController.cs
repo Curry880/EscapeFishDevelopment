@@ -9,7 +9,10 @@ public class PlayerControllerView : MonoBehaviour
 
     void Update()
     {
-        playerMovement.VerticalMovementControl();
+        float x = Input.GetAxis("Horizontal");
+        float y = Input.GetAxis("Vertical");
+        playerMovement.MovePlayer(x, y);
+        /*
         switch (controlMode)
         {
             case ControlMode.FlappyBird:
@@ -22,7 +25,8 @@ public class PlayerControllerView : MonoBehaviour
                 playerMovement.BothControls();
                 break;
         }
-        Debug.Log(playerMovement.rb.velocity);
+        */
+        //Debug.Log(playerMovement.rb.velocity);
     }
 }
 

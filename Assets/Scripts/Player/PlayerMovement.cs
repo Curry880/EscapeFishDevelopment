@@ -55,4 +55,55 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, 0);
         }
     }
+
+    // Editable Parameters
+    private float maximumSpeed = 30.0f;
+    private float acceleration = 1.0f;
+
+    private float speedX = 0.0f;
+    private float speedZ = 0.0f;
+
+    public void MovePlayer(float x, float z)
+    {
+        // ¶•ûŒü‚Ö‚ÌˆÚ“®
+        if (x < -0.10f)
+        {
+            if (speedX - acceleration > maximumSpeed * x) { speedX -= acceleration; }
+            else { speedX = maximumSpeed * x; }
+        }
+        // ‰E•ûŒü‚Ö‚ÌˆÚ“®
+        else if (x > 0.10f)
+        {
+            if (speedX + acceleration < maximumSpeed * x) { speedX += acceleration; }
+            else { speedX = maximumSpeed * x; }
+        }
+        // ‰½‚à“ü—Í‚³‚ê‚Ä‚¢‚È‚¢ê‡‚ÍŒ¸‘¬
+        else { speedX *= 0.90f; }
+
+        // ‘O•ûŒü‚Ö‚ÌˆÚ“®
+        if (z > 0.10f)
+        {
+            if (speedZ + acceleration < maximumSpeed * z) { speedZ += acceleration; }
+            else { speedZ = maximumSpeed * z; }
+        }
+        // Œã•ûŒü‚Ö‚ÌˆÚ“®
+        else if (z < -0.10f)
+        {
+            if (speedZ - acceleration > maximumSpeed * z) { speedZ -= acceleration; }
+            else { speedZ = maximumSpeed * z; }
+        }
+        // ‰½‚à“ü—Í‚³‚ê‚Ä‚¢‚È‚¢ê‡‚ÍŒ¸‘¬
+        else { speedZ *= 0.90f; }
+
+        // ˆÚ“®‚·‚é
+        transform.Translate(speedX * Time.deltaTime, speedZ * Time.deltaTime, 0.0f);
+
+        /*
+        // ˆÚ“®‰Â”\”ÍˆÍ‚ğ’´‚¦‚È‚¢‚æ‚¤‚É‚·‚é
+        Vector3 currentPosition = transform.position;
+        currentPosition.x = Mathf.Clamp(currentPosition.x, movableArea.xNegativeLimit, movableArea.xPositiveLimit);
+        currentPosition.z = Mathf.Clamp(currentPosition.z, movableArea.zNegativeLimit, movableArea.zPositiveLimit);
+        transform.position = currentPosition;
+        */
+    }
 }
