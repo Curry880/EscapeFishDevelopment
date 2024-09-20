@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5647312798088132459}
   - component: {fileID: 8456747437390760060}
   m_Layer: 0
-  m_Name: SeaAnemone 1
+  m_Name: SeaAnemoneShort
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -93,8 +93,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb635412b527ab24485c9ae338b4e6af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
+  speed: 1.7
   loop: 0
+  offset: 5
 --- !u!114 &8456747437390760060
 MonoBehaviour:
   m_ObjectHideFlags: 0
