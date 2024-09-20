@@ -18,6 +18,7 @@ public class ShipMovement : MonoBehaviour
     {
         // íPêUìÆÇÃåvéZ
         float oscillation = amplitude * Mathf.Sin(2 * Mathf.PI * frequency * Time.time);
-        transform.position = initialPosition + direction.normalized * oscillation;
+        Vector2 pos = initialPosition + direction.normalized * oscillation;
+        transform.position = new Vector3(transform.position.x, pos.y, transform.position.z);
     }
 }

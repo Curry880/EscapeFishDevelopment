@@ -6,15 +6,15 @@ public class EnemyObjectMovement : MonoBehaviour
 {
     [SerializeField] float speed = 2.0f;
     [SerializeField] bool loop = false;
+    [SerializeField] float offset = 5f;
     private float warpThreshold;
     private Vector2 warpPosition = Vector2.zero;
     // Start is called before the first frame update
     void Start()
     {
-        warpThreshold = Camera.main.ViewportToWorldPoint(new Vector2(0, 0)).x - 10;
-        warpPosition.x = Camera.main.ViewportToWorldPoint(new Vector2(1, 1)).x + 10;
+        warpThreshold = Camera.main.ViewportToWorldPoint(new Vector2(0, 0)).x - offset;
+        warpPosition.x = Camera.main.ViewportToWorldPoint(new Vector2(1, 1)).x + offset;
         warpPosition.y = transform.position.y;
-        Debug.Log(warpThreshold);
     }
 
     // Update is called once per frame
