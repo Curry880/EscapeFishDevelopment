@@ -34,8 +34,13 @@ public class EnemyManager : MonoBehaviour
 
     IEnumerator SpawnEnemy()
     {
-        while (GameManager.isPlaying)
+        while (true)
         {
+            if(!GameManager.isPlaying)
+            {
+                yield return new WaitForSeconds(1);
+                continue;
+            }
             // ランダムな時間待機
             float spawnDelay = Random.Range(minSpawnTime, maxSpawnTime);
             yield return new WaitForSeconds(spawnDelay);

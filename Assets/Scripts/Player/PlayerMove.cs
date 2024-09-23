@@ -1,13 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
-    [SerializeField] float jumpForce = 10f;
-    [SerializeField] float moveSpeed = 5f;
-    [SerializeField] float leftwardForce = 2f;
     private Rigidbody2D rb;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -17,20 +14,28 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        PlayerParameters playerParametersInstance = (PlayerParameters)SingletonManager.Instance;
+        Dictionary<PlayerParameter, float> playerParameters = playerParametersInstance.GetAllParameters();
+
+        float swimForce = playerParameters[PlayerParameter.SwimForce];
+        float currentForce = playerParameters[PlayerParameter.CurrentForce];
+        float moveSpeed = playerParameters[PlayerParameter.MoveSpeed];
+
+        if (Input.GetKeyDown(KeyCode.Space) || (!GameManager.isPlaying && transform.position.x < -5))
         {
             float move = Input.GetAxis("Vertical");
-            rb.velocity = new Vector2(jumpForce, move * moveSpeed);
+            Vector2 origineVector = new Vector2(swimForce, move * moveSpeed);
+            rb.velocity = origineVector.normalized * swimForce;
         }
 
         // 常に左に動く力を加える
-        rb.AddForce(new Vector2(-leftwardForce, 0));
+        rb.AddForce(new Vector2(-currentForce, 0));
 
         // 移動の制限
-        Clamp();
+        ClampPosition();
     }
 
-    void Clamp()
+    void ClampPosition()
     {
         // 画面左下のワールド座標をビューポイントから取得
         Vector2 min = Camera.main.ViewportToWorldPoint(new Vector2(0, 0));
@@ -46,3 +51,4 @@ public class PlayerMove : MonoBehaviour
         transform.position = pos;
     }
 }
+
