@@ -14,7 +14,7 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        PlayerParameters playerParametersInstance = (PlayerParameters)SingletonManager.Instance;
+        PlayerParametersEnum playerParametersInstance = (PlayerParametersEnum)SingletonManager.Instance;
         Dictionary<PlayerParameter, float> playerParameters = playerParametersInstance.GetAllParameters();
 
         float swimForce = playerParameters[PlayerParameter.SwimForce];

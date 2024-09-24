@@ -24,7 +24,7 @@ public class SliderTextSync : MonoBehaviour
         valueText.text = value.ToString("0.00");
 
         // キャラクターのパラメータをスライダーの値に応じて変更
-        PlayerParameters playerParametersInstance = (PlayerParameters)SingletonManager.Instance;
+        PlayerParametersEnum playerParametersInstance = (PlayerParametersEnum)SingletonManager.Instance;
         playerParametersInstance.SetParameter(playerParameter, value);
     }
 }

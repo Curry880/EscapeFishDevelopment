@@ -1,93 +1,29 @@
-using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
-
-public enum PlayerParameter
-{
-    SwimForce,
-    MoveSpeed,
-    CurrentForce
-}
+using UnityEngine;
 
 public class PlayerParameters : MonoBehaviour
 {
-    // 列挙型でパラメータを識別
-    
-
-    // パラメータを格納するクラス
-    [System.Serializable]
-    public class Parameter
+    public Dictionary<string, float> parameters = new Dictionary<string, float>()
     {
-        public PlayerParameter parameterType;  // パラメータの種類
-        public float value;  // パラメータの値
-    }
+        { "Health", 100f },
+        { "Speed", 5f },
+        { "Stamina", 50f }
+    };
 
-    // パラメータのリストを作成（インスペクターで設定可能）
-    public List<Parameter> parameters = new List<Parameter>();
-
-    private void Awake()
+    public void AddParameter(string name, float value)
     {
-        SingletonManager.RegisterInstance(this); // シングルトン管理クラスを通じて登録
-    }
-
-    // パラメータに値を設定するメソッド
-    public void SetParameter(PlayerParameter parameterType, float value)
-    {
-        // リストの中から一致するパラメータを見つけて値を設定
-        foreach (var param in parameters)
+        if (!parameters.ContainsKey(name))
         {
-            if (param.parameterType == parameterType)
-            {
-                param.value = value;
-                Debug.Log(parameterType.ToString() + " が " + value + " に設定されました");
-                return;
-            }
+            parameters.Add(name, value);
         }
-
-        Debug.LogWarning("指定されたパラメータが見つかりません: " + parameterType);
     }
 
-    // パラメータを取得するメソッド
-    public float GetParameter(PlayerParameter parameterType)
+    public void RemoveParameter(string name)
     {
-        foreach (var param in parameters)
+        if (parameters.ContainsKey(name))
         {
-            if (param.parameterType == parameterType)
-            {
-                return param.value;
-            }
-        }
-
-        Debug.LogWarning("指定されたパラメータが見つかりません: " + parameterType);
-        return 0;
-    }
-    // 複数のパラメータを一括で取得するメソッド
-    public Dictionary<PlayerParameter, float> GetAllParameters()
-    {
-        Dictionary<PlayerParameter, float> allParameters = new Dictionary<PlayerParameter, float>();
-
-        // リスト内のすべてのパラメータをDictionaryに追加
-        foreach (var param in parameters)
-        {
-            allParameters.Add(param.parameterType, param.value);
-        }
-
-        return allParameters;
-    }
-}
-public static class SingletonManager
-{
-    public static MonoBehaviour Instance { get; private set; }
-    public static void RegisterInstance<T>(T instance) where T : MonoBehaviour
-    {
-        if (Instance == null)
-        {
-            Instance = instance;
-            Object.DontDestroyOnLoad(instance.gameObject);
-        }
-        else
-        {
-            Object.Destroy(instance.gameObject);
+            parameters.Remove(name);
         }
     }
 }
-
