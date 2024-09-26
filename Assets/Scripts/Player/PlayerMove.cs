@@ -4,6 +4,7 @@ using UnityEngine;
 public class PlayerMove : MonoBehaviour
 {
     private Rigidbody2D rb;
+    [SerializeField] PlayerData playerData;
 
     // Start is called before the first frame update
     void Start()
@@ -14,12 +15,18 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        /*
         PlayerParametersEnum playerParametersInstance = (PlayerParametersEnum)SingletonManager.Instance;
         Dictionary<PlayerParameter, float> playerParameters = playerParametersInstance.GetAllParameters();
 
         float swimForce = playerParameters[PlayerParameter.SwimForce];
         float currentForce = playerParameters[PlayerParameter.CurrentForce];
         float moveSpeed = playerParameters[PlayerParameter.MoveSpeed];
+        */
+
+        float swimForce = playerData.swimForce;
+        float currentForce = playerData.currentForce;
+        float moveSpeed = playerData.moveSpeed;
 
         if (Input.GetKeyDown(KeyCode.Space) || (!GameManager.isPlaying && transform.position.x < -5))
         {

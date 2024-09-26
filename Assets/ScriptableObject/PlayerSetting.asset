@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a19d6feaacb107942b1dcdf9fd16fc0d, type: 3}
   m_Name: PlayerSetting
   m_EditorClassIdentifier: 
-  swimForce: 100
-  currentForce: 0
-  moveSpeed: 0
+  swimForce: 10
+  currentForce: 2
+  moveSpeed: 2
