@@ -14,7 +14,16 @@ public class UIManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.isPlaying)
+        switch (GameManager.Instance.currentState)
+        {
+            case GameState.Title:
+                break;
+            case GameState.Gameplay:
+                break;
+            case GameState.Result:
+                break;
+        }
+        if (GameManager.Instance.currentState != GameState.Gameplay)
         {
             return;
         }

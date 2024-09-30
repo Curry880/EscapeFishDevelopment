@@ -24,7 +24,7 @@ public class EnemyManager : MonoBehaviour
 
     void Spawn()
     {
-        if (GameManager.isPlaying)
+        if (GameManager.Instance.currentState == GameState.Gameplay)
         {
             int spawnPointIndex = Random.Range(0, spawnPoints.Length);
             int enemyIndex = Random.Range(0, enemies.Length);
@@ -36,7 +36,7 @@ public class EnemyManager : MonoBehaviour
     {
         while (true)
         {
-            if(!GameManager.isPlaying)
+            if(GameManager.Instance.currentState != GameState.Gameplay)
             {
                 yield return new WaitForSeconds(1);
                 continue;

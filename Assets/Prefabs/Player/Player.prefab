@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5427280606509749067}
   - component: {fileID: 8121910112982072391}
   - component: {fileID: 752946936677789745}
+  - component: {fileID: 9028908645504220928}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -171,6 +172,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23d0b700995c869448e2618960aa15b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 10
-  moveSpeed: 5
-  leftwardForce: 2
+  playerData: {fileID: 11400000, guid: 98f3d20bd4c21c044933ef5a03093bcb, type: 2}
+--- !u!114 &9028908645504220928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5488923439081649219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d5e9bc517ec54742ab32b0374d84205, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invincibilityDuration: 3
+  playerRenderer: {fileID: 7380895994301690287}
+  blinkColor: {r: 0, g: 0, b: 0, a: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disableWhileInvincible:
+  - {fileID: 752946936677789745}
