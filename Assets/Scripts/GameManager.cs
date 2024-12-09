@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum GameState
 {
@@ -12,6 +13,11 @@ public enum GameState
 
 public class GameManager : MonoBehaviour
 {
+    public GameObject[] displayObjects;          // ゲームスタート時に表示させるオブジェクトたち
+    public GameObject goalObject;
+    public Text scoreText;
+    public Slider scoreSlider;
+    public int clearScore;
     public static GameManager Instance;
     public GameState currentState;
 
@@ -42,6 +48,7 @@ public class GameManager : MonoBehaviour
     {
         currentState = GameState.Title;
         score = 0;
+        scoreSlider.maxValue = clearScore;
     }
 
     // Update is called once per frame
@@ -53,8 +60,19 @@ public class GameManager : MonoBehaviour
             score = 0;
             StartCoroutine(StartGame());
         }
-        score += Time.deltaTime;
-        Debug.Log(score);
+       
+        if (currentState == GameState.Gameplay)
+        {
+            score += Time.deltaTime;
+            scoreSlider.value = score;
+            scoreText.text = score.ToString("F2");
+            // Debug.Log(score);
+            if (score > clearScore)
+            {
+                currentState = GameState.Result;
+                Instantiate(goalObject);
+            }
+        }
     }
 
     IEnumerator StartGame()
@@ -76,8 +94,33 @@ public class GameManager : MonoBehaviour
             // 目標位置にぴったりと合わせる
             player.transform.position = targetPosition;
         }
-
+        foreach(GameObject displayObject in displayObjects)
+        {
+            displayObject.SetActive(true);
+        }
+        
         // 無敵状態を開始
         invincibility.StartCoroutine("BecomeInvincible");
+    }
+
+    public IEnumerator EndGame()
+    {
+        // プレイヤーの位置を取得
+        Vector3 startPosition = player.transform.position;
+        Vector3 goalPosition = new Vector3(13, 0, 0);
+        if (startPosition != goalPosition)
+        {
+            float elapsedTime = 0f;
+            while (elapsedTime < moveDuration)
+            {
+                // 線形補間を使って移動
+                player.transform.position = Vector3.Lerp(startPosition, goalPosition, elapsedTime / moveDuration);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            // 目標位置にぴったりと合わせる
+            player.transform.position = goalPosition;
+        }
+        player.SetActive(false);
     }
 }

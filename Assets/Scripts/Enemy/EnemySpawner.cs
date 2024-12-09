@@ -57,7 +57,11 @@ public class EnemySpawner : MonoBehaviour
             spawnPosition.y += Random.Range(-verticalOffsetRange, verticalOffsetRange);
 
             // 敵を生成
-            Instantiate(enemies[enemyIndex], spawnPosition, Quaternion.identity);
+            if(GameManager.Instance.currentState == GameState.Gameplay)
+            {
+                Instantiate(enemies[enemyIndex], spawnPosition, Quaternion.identity);
+                Debug.Log("spown");
+            }
         }
     }
 

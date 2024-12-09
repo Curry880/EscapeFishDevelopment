@@ -21,6 +21,7 @@ public class RandomFishingNetMovement : MonoBehaviour
     void Update()
     {
         // 初期位置にランダムなオフセットを加えた新しい位置を設定
-        transform.position = initialPosition + Random.insideUnitCircle * randomMovementRange;
+        // transform.position = initialPosition + Random.insideUnitCircle * randomMovementRange;
+        transform.localPosition = new Vector2(-0.3f, -0.6f) + Random.insideUnitCircle * randomMovementRange;
     }
 }
